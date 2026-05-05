@@ -1,131 +1,723 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OT Milestone Tracker</title>
-    <style>
-        :root { --primary: #2563eb; --success: #10b981; --bg: #f8fafc; --text: #1e293b; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; padding: 1.2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 450px; margin-bottom: 15px; box-sizing: border-box; }
-        h2 { margin-top: 0; font-size: 1.1rem; text-align: center; }
-        
-        /* Milestone Styles */
-        .milestone-container { text-align: center; margin-bottom: 10px; }
-        .progress-bg { background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { background: var(--success); height: 100%; width: 0%; transition: width 0.5s ease-in-out; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-top: 10px; }
-        .stat-card { background: #f1f5f9; padding: 8px; border-radius: 8px; }
-        
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-        .full { grid-column: span 2; }
-        label { display: block; margin-bottom: 4px; font-size: 0.75rem; font-weight: bold; color: #64748b; }
-        input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
-        
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
-        .btn-save { background: var(--primary); color: white; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
-        th, td { border-bottom: 1px solid #e2e8f0; padding: 8px 4px; text-align: center; }
-        .ot-val { color: #dc2626; font-weight: 600; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OT Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --accent: #c8f566;
+    --accent-dim: rgba(200,245,102,0.12);
+    --accent-dim2: rgba(200,245,102,0.06);
+    --text: #f0f0ee;
+    --muted: #7a7a88;
+    --danger: #ff5e5e;
+    --danger-dim: rgba(255,94,94,0.12);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .app-header {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .app-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .app-title span { color: var(--accent); }
+
+  /* Month Selector */
+  .month-bar {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    margin-bottom: 16px;
+  }
+
+  .month-nav {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+
+  .month-nav:hover { color: var(--text); background: var(--surface2); }
+
+  .month-label {
+    flex: 1;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+
+  .reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .reset-btn:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-dim); }
+
+  /* Milestone Card */
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 14px;
+  }
+
+  .milestone-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 14px;
+  }
+
+  .ot-big {
+    font-family: 'DM Mono', monospace;
+    font-size: 2.6rem;
+    font-weight: 500;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .ot-big sub {
+    font-size: 1rem;
+    color: var(--muted);
+    vertical-align: middle;
+  }
+
+  .target-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .target-lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  .target-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    color: var(--text);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    width: 80px;
+    text-align: right;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .target-input:focus { border-color: var(--accent); }
+
+  /* Progress Bar */
+  .progress-track {
+    background: var(--surface2);
+    height: 8px;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    width: 0%;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .progress-fill.done { background: #6eefb5; }
+
+  .milestone-stats {
+    display: flex;
+    gap: 10px;
+  }
+
+  .stat {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+
+  .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+  .stat-val { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; }
+  .stat-val.accent { color: var(--accent); }
+
+  /* Input Card */
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .full { grid-column: span 2; }
+
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.92rem;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus { border-color: var(--accent); }
+  .field input::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+
+  .save-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #0f0f11;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .save-btn:hover { opacity: 0.9; }
+  .save-btn:active { transform: scale(0.98); }
+
+  /* Edit mode */
+  .edit-fields {
+    display: none;
+    gap: 6px;
+    align-items: center;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    margin-top: 6px;
+  }
+
+  .edit-fields.active { display: flex; }
+
+  .edit-fields input {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 5px 8px;
+    outline: none;
+    width: 90px;
+  }
+
+  .edit-fields input:focus { border-color: var(--accent); }
+
+  .edit-save-btn, .edit-cancel-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .edit-save-btn { background: var(--accent); color: #0f0f11; font-weight: 700; }
+  .edit-cancel-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
+  .edit-save-btn:hover, .edit-cancel-btn:hover { opacity: 0.8; }
+
+  /* Log Table */
+  .log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .log-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+  .log-count { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+
+  .log-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .log-empty {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .log-row {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: border-color 0.15s;
+  }
+
+  .log-row:hover { border-color: #3e3e50; }
+
+  .log-row.editing { border-color: var(--accent); }
+
+  .log-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--muted);
+    min-width: 52px;
+  }
+
+  .log-times {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+  }
+
+  .log-ot {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 52px;
+    text-align: right;
+  }
+
+  .log-ot.zero { color: var(--muted); }
+
+  .row-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .icon-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 4px 7px;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+
+  .icon-btn:hover { color: var(--text); border-color: #3e3e50; }
+  .icon-btn.del:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-dim); }
+  .icon-btn.edit-active { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 18px;
+    font-size: 0.82rem;
+    color: var(--text);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 100;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--accent); color: var(--accent); }
+  .toast.danger { border-color: var(--danger); color: var(--danger); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+  .modal p { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
+
+  .modal-actions { display: flex; gap: 8px; }
+
+  .modal-btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    transition: opacity 0.15s;
+  }
+
+  .modal-btn:hover { opacity: 0.85; }
+  .modal-cancel { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .modal-confirm { background: var(--danger); color: white; }
+</style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Monthly Milestone</h2>
-    <div class="milestone-container">
-        <label>Target OT Hours</label>
-        <input type="number" id="targetInput" value="40" onchange="saveTarget()" style="width: 80px; text-align: center;">
-        
-        <div class="progress-bg">
-            <div id="progressFill" class="progress-fill"></div>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                Progress: <b id="percentText">0%</b>
-            </div>
-            <div class="stat-card">
-                Remaining: <b id="remainingText">0h</b>
-            </div>
-        </div>
-    </div>
+<div class="app-header">
+  <div class="app-title">OT <span>Tracker</span></div>
 </div>
 
-<div class="card">
-    <div class="input-grid">
-        <div class="full">
-            <label>Date</label>
-            <input type="date" id="workDate">
-        </div>
-        <div><label>In</label><input type="time" id="inTime" value="08:30"></div>
-        <div><label>Out</label><input type="time" id="outTime" value="17:00"></div>
-    </div>
-    <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+<!-- Month Navigation -->
+<div class="month-bar">
+  <button class="month-nav" onclick="changeMonth(-1)">&#8249;</button>
+  <div class="month-label" id="monthLabel">—</div>
+  <button class="month-nav" onclick="changeMonth(1)">&#8250;</button>
+  <button class="reset-btn" onclick="confirmReset()">Reset month</button>
 </div>
 
+<!-- Milestone -->
 <div class="card">
-    <table>
-        <thead><tr><th>Date</th><th>In</th><th>Out</th><th>OT</th></tr></thead>
-        <tbody id="logBody"></tbody>
-    </table>
+  <div class="milestone-top">
+    <div>
+      <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:6px">Total OT</div>
+      <div class="ot-big" id="totalOT">0.00 <sub>hrs</sub></div>
+    </div>
+    <div class="target-area">
+      <div class="target-lbl">Target hrs</div>
+      <input class="target-input" type="number" id="targetInput" value="40" onchange="saveTarget()">
+    </div>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  <div class="milestone-stats">
+    <div class="stat">
+      <div class="stat-label">Progress</div>
+      <div class="stat-val accent" id="percentText">0%</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Remaining</div>
+      <div class="stat-val" id="remainingText">0.00h</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Entries</div>
+      <div class="stat-val" id="entryCount">0</div>
+    </div>
+  </div>
+</div>
+
+<!-- Input -->
+<div class="card">
+  <div class="input-grid">
+    <div class="field full">
+      <label>Date</label>
+      <input type="date" id="workDate">
+    </div>
+    <div class="field">
+      <label>Clock In</label>
+      <input type="time" id="inTime" value="08:30">
+    </div>
+    <div class="field">
+      <label>Clock Out</label>
+      <input type="time" id="outTime" value="17:00">
+    </div>
+  </div>
+  <button class="save-btn" onclick="saveEntry()">Save Entry</button>
+</div>
+
+<!-- Log -->
+<div class="card">
+  <div class="log-header">
+    <div class="log-title">Log</div>
+    <div class="log-count" id="logCount"></div>
+  </div>
+  <div class="log-list" id="logList"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Reset Confirm Modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal">
+    <h3>Reset this month?</h3>
+    <p>All entries for <span id="resetMonthName"></span> will be permanently deleted. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="modal-btn modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="modal-btn modal-confirm" onclick="doReset()">Reset</button>
+    </div>
+  </div>
 </div>
 
 <script>
-    document.getElementById('workDate').valueAsDate = new Date();
-    
-    // Load Saved Target
-    if(localStorage.getItem('ot_target')) {
-        document.getElementById('targetInput').value = localStorage.getItem('ot_target');
-    }
+  const STORE_KEY = 'ot_tracker_v4';
+  const TARGET_KEY = 'ot_target_v4';
 
-    function saveTarget() {
-        localStorage.setItem('ot_target', document.getElementById('targetInput').value);
-        render();
-    }
+  // Current view month
+  let viewDate = new Date();
+  viewDate.setDate(1);
 
-    function saveEntry() {
-        const date = document.getElementById('workDate').value;
-        const inT = document.getElementById('inTime').value;
-        const outT = document.getElementById('outTime').value;
-        
-        const toMins = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
-        let start = toMins(inT), end = toMins(outT);
-        if (end < start) end += 1440;
+  function getMonthKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
 
-        const ot = Math.max(0, (end - start - 30) / 60 - 8.0);
+  function getMonthLabel(d) {
+    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }
 
-        let logs = JSON.parse(localStorage.getItem('my_ot_v3') || '[]');
-        logs = logs.filter(l => l.date !== date);
-        logs.push({ date, inT, outT, ot });
-        localStorage.setItem('my_ot_v3', JSON.stringify(logs));
-        render();
-    }
+  function getLogs() {
+    return JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+  }
 
-    function render() {
-        const logs = JSON.parse(localStorage.getItem('my_ot_v3') || '[]');
-        const target = parseFloat(document.getElementById('targetInput').value) || 1;
-        const body = document.getElementById('logBody');
-        let totalOT = 0;
+  function saveLogs(data) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  }
 
-        body.innerHTML = '';
-        logs.sort((a,b) => new Date(a.date) - new Date(b.date)).forEach(item => {
-            totalOT += item.ot;
-            const displayDate = item.date.split('-').reverse().slice(0, 2).join('/');
-            body.innerHTML += `<tr><td>${displayDate}</td><td>${item.inT}</td><td>${item.outT}</td><td class="ot-val">${item.ot.toFixed(2)}</td></tr>`;
-        });
+  function calcOT(inT, outT) {
+    const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
+    let s = toMins(inT), e = toMins(outT);
+    if (e < s) e += 1440;
+    return Math.max(0, (e - s - 30) / 60 - 8.0);
+  }
 
-        // Update Milestone
-        const percent = Math.min(100, (totalOT / target) * 100);
-        const remaining = Math.max(0, target - totalOT);
-        
-        document.getElementById('progressFill').style.width = percent + '%';
-        document.getElementById('percentText').innerText = percent.toFixed(1) + '%';
-        document.getElementById('remainingText').innerText = remaining.toFixed(2) + 'h';
-    }
-
+  function changeMonth(delta) {
+    viewDate.setMonth(viewDate.getMonth() + delta);
     render();
+  }
+
+  // Set today's date in input
+  const today = new Date();
+  document.getElementById('workDate').value = today.toISOString().slice(0,10);
+
+  // Load target
+  const savedTarget = localStorage.getItem(TARGET_KEY);
+  if (savedTarget) document.getElementById('targetInput').value = savedTarget;
+
+  function saveTarget() {
+    localStorage.setItem(TARGET_KEY, document.getElementById('targetInput').value);
+    render();
+  }
+
+  function saveEntry() {
+    const date = document.getElementById('workDate').value;
+    const inT  = document.getElementById('inTime').value;
+    const outT = document.getElementById('outTime').value;
+    if (!date || !inT || !outT) { showToast('Fill all fields', 'danger'); return; }
+
+    const ot = calcOT(inT, outT);
+    const all = getLogs();
+    const mk = date.slice(0,7);
+    if (!all[mk]) all[mk] = [];
+    all[mk] = all[mk].filter(l => l.date !== date);
+    all[mk].push({ date, inT, outT, ot });
+    saveLogs(all);
+
+    // Navigate to the saved month
+    viewDate = new Date(date + 'T00:00:00');
+    viewDate.setDate(1);
+
+    showToast('Entry saved', 'success');
+    render();
+  }
+
+  let editingDate = null;
+
+  function startEdit(date) {
+    editingDate = date;
+    render();
+  }
+
+  function cancelEdit() {
+    editingDate = null;
+    render();
+  }
+
+  function saveEdit(date) {
+    const inT  = document.getElementById('edit-in-' + date).value;
+    const outT = document.getElementById('edit-out-' + date).value;
+    if (!inT || !outT) return;
+    const ot = calcOT(inT, outT);
+    const mk = date.slice(0,7);
+    const all = getLogs();
+    const idx = all[mk].findIndex(l => l.date === date);
+    if (idx > -1) { all[mk][idx] = { date, inT, outT, ot }; }
+    saveLogs(all);
+    editingDate = null;
+    showToast('Entry updated', 'success');
+    render();
+  }
+
+  function deleteEntry(date) {
+    const mk = date.slice(0,7);
+    const all = getLogs();
+    if (all[mk]) all[mk] = all[mk].filter(l => l.date !== date);
+    saveLogs(all);
+    showToast('Entry deleted', 'danger');
+    render();
+  }
+
+  function confirmReset() {
+    document.getElementById('resetMonthName').textContent = getMonthLabel(viewDate);
+    document.getElementById('resetModal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('resetModal').classList.remove('show');
+  }
+
+  function doReset() {
+    const mk = getMonthKey(viewDate);
+    const all = getLogs();
+    delete all[mk];
+    saveLogs(all);
+    closeModal();
+    showToast('Month reset', 'danger');
+    render();
+  }
+
+  let toastTimer;
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || '');
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function fmtDate(dateStr) {
+    const [y,m,d] = dateStr.split('-');
+    return `${d}/${m}`;
+  }
+
+  function render() {
+    const mk = getMonthKey(viewDate);
+    document.getElementById('monthLabel').textContent = getMonthLabel(viewDate);
+
+    const all = getLogs();
+    const entries = (all[mk] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+
+    const target = parseFloat(document.getElementById('targetInput').value) || 1;
+    let totalOT = entries.reduce((s, e) => s + e.ot, 0);
+
+    const percent = Math.min(100, (totalOT / target) * 100);
+    const remaining = Math.max(0, target - totalOT);
+
+    document.getElementById('totalOT').innerHTML = `${totalOT.toFixed(2)} <sub>hrs</sub>`;
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressFill').className = 'progress-fill' + (percent >= 100 ? ' done' : '');
+    document.getElementById('percentText').textContent = percent.toFixed(1) + '%';
+    document.getElementById('remainingText').textContent = remaining.toFixed(2) + 'h';
+    document.getElementById('entryCount').textContent = entries.length;
+    document.getElementById('logCount').textContent = entries.length ? entries.length + ' entries' : '';
+
+    const list = document.getElementById('logList');
+    if (!entries.length) {
+      list.innerHTML = '<div class="log-empty">No entries for this month</div>';
+      return;
+    }
+
+    list.innerHTML = entries.map(item => {
+      const isEditing = editingDate === item.date;
+      return `
+        <div class="log-row ${isEditing ? 'editing' : ''}">
+          <div class="log-date">${fmtDate(item.date)}</div>
+          <div style="flex:1">
+            <div class="log-times">${item.inT} – ${item.outT}</div>
+            <div class="edit-fields ${isEditing ? 'active' : ''}">
+              <input type="time" id="edit-in-${item.date}" value="${item.inT}">
+              <span style="color:var(--muted);font-size:0.75rem">→</span>
+              <input type="time" id="edit-out-${item.date}" value="${item.outT}">
+              <button class="edit-save-btn" onclick="saveEdit('${item.date}')">Save</button>
+              <button class="edit-cancel-btn" onclick="cancelEdit()">✕</button>
+            </div>
+          </div>
+          <div class="log-ot ${item.ot === 0 ? 'zero' : ''}">${item.ot.toFixed(2)}h</div>
+          <div class="row-actions">
+            <button class="icon-btn ${isEditing ? 'edit-active' : ''}" onclick="${isEditing ? 'cancelEdit()' : `startEdit('${item.date}')`}" title="Edit">✎</button>
+            <button class="icon-btn del" onclick="deleteEntry('${item.date}')" title="Delete">✕</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  render();
 </script>
 </body>
 </html>
