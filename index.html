@@ -7,442 +7,133 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f0f11;
-    --surface: #18181c;
-    --surface2: #222228;
-    --border: #2e2e38;
-    --accent: #c8f566;
-    --accent-dim: rgba(200,245,102,0.12);
-    --accent-dim2: rgba(200,245,102,0.06);
-    --text: #f0f0ee;
-    --muted: #7a7a88;
-    --danger: #ff5e5e;
-    --danger-dim: rgba(255,94,94,0.12);
-    --radius: 14px;
-    --radius-sm: 8px;
+    --bg: #0f0f11; --surface: #18181c; --surface2: #222228; --border: #2e2e38;
+    --accent: #c8f566; --accent-dim: rgba(200,245,102,0.12);
+    --text: #f0f0ee; --muted: #7a7a88;
+    --danger: #ff5e5e; --danger-dim: rgba(255,94,94,0.12);
+    --radius: 14px; --radius-sm: 8px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Syne', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px 16px 60px; display: flex; flex-direction: column; align-items: center; }
 
-  body {
-    font-family: 'Syne', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 24px 16px 60px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .app-header {
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-  }
-
-  .app-title {
-    font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-
+  .app-header { width: 100%; max-width: 480px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .app-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
   .app-title span { color: var(--accent); }
 
-  /* Month Selector */
-  .month-bar {
-    width: 100%;
-    max-width: 480px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    margin-bottom: 16px;
-  }
+  .sync-badge { font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); color: var(--muted); display: flex; align-items: center; gap: 5px; transition: all 0.3s; }
+  .sync-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); transition: background 0.3s; }
+  .sync-badge.synced { border-color: var(--accent); color: var(--accent); }
+  .sync-badge.synced .dot { background: var(--accent); }
+  .sync-badge.syncing { border-color: #f5a623; color: #f5a623; }
+  .sync-badge.syncing .dot { background: #f5a623; animation: pulse 1s infinite; }
+  .sync-badge.error { border-color: var(--danger); color: var(--danger); }
+  .sync-badge.error .dot { background: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  .month-nav {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: var(--radius-sm);
-    transition: color 0.15s, background 0.15s;
-    line-height: 1;
-  }
-
+  .month-bar { width: 100%; max-width: 480px; display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px; }
+  .month-nav { background: none; border: none; color: var(--muted); font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); transition: color 0.15s, background 0.15s; line-height: 1; }
   .month-nav:hover { color: var(--text); background: var(--surface2); }
-
-  .month-label {
-    flex: 1;
-    text-align: center;
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-  }
-
-  .reset-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 5px 10px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-  }
-
+  .month-label { flex: 1; text-align: center; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.03em; }
+  .reset-btn { font-family: 'DM Mono', monospace; font-size: 0.7rem; background: none; border: 1px solid var(--border); color: var(--muted); padding: 5px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
   .reset-btn:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-dim); }
 
-  /* Milestone Card */
-  .card {
-    width: 100%;
-    max-width: 480px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 14px;
-  }
+  .card { width: 100%; max-width: 480px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
 
-  .milestone-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 14px;
-  }
-
-  .ot-big {
-    font-family: 'DM Mono', monospace;
-    font-size: 2.6rem;
-    font-weight: 500;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .ot-big sub {
-    font-size: 1rem;
-    color: var(--muted);
-    vertical-align: middle;
-  }
-
-  .target-area {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
-  }
-
+  .milestone-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 14px; }
+  .ot-big { font-family: 'DM Mono', monospace; font-size: 2.6rem; font-weight: 500; color: var(--accent); line-height: 1; }
+  .ot-big sub { font-size: 1rem; color: var(--muted); vertical-align: middle; }
+  .target-area { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
   .target-lbl { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-
-  .target-input {
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    color: var(--text);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 6px 10px;
-    width: 80px;
-    text-align: right;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
+  .target-input { font-family: 'DM Mono', monospace; font-size: 1rem; color: var(--text); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; width: 80px; text-align: right; outline: none; transition: border-color 0.15s; }
   .target-input:focus { border-color: var(--accent); }
 
-  /* Progress Bar */
-  .progress-track {
-    background: var(--surface2);
-    height: 8px;
-    border-radius: 99px;
-    overflow: hidden;
-    margin-bottom: 12px;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 99px;
-    width: 0%;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
+  .progress-track { background: var(--surface2); height: 8px; border-radius: 99px; overflow: hidden; margin-bottom: 12px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; width: 0%; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
   .progress-fill.done { background: #6eefb5; }
 
-  .milestone-stats {
-    display: flex;
-    gap: 10px;
-  }
-
-  .stat {
-    flex: 1;
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-  }
-
+  .milestone-stats { display: flex; gap: 10px; }
+  .stat { flex: 1; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
   .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
   .stat-val { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 500; }
   .stat-val.accent { color: var(--accent); }
 
-  /* Input Card */
-  .input-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-
+  .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
   .full { grid-column: span 2; }
-
-  .field label {
-    display: block;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-
-  .field input {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.92rem;
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
+  .field label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.92rem; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
   .field input:focus { border-color: var(--accent); }
   .field input::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
 
-  .save-btn {
-    width: 100%;
-    padding: 13px;
-    background: var(--accent);
-    color: #0f0f11;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    letter-spacing: 0.04em;
-    transition: opacity 0.15s, transform 0.1s;
-  }
-
+  .save-btn { width: 100%; padding: 13px; background: var(--accent); color: #0f0f11; font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; border: none; border-radius: var(--radius-sm); cursor: pointer; letter-spacing: 0.04em; transition: opacity 0.15s, transform 0.1s; }
   .save-btn:hover { opacity: 0.9; }
   .save-btn:active { transform: scale(0.98); }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-  /* Edit mode */
-  .edit-fields {
-    display: none;
-    gap: 6px;
-    align-items: center;
-    background: var(--surface2);
-    border-radius: var(--radius-sm);
-    padding: 6px 8px;
-    margin-top: 6px;
-  }
-
-  .edit-fields.active { display: flex; }
-
-  .edit-fields input {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    padding: 5px 8px;
-    outline: none;
-    width: 90px;
-  }
-
-  .edit-fields input:focus { border-color: var(--accent); }
-
-  .edit-save-btn, .edit-cancel-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    padding: 5px 10px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-
-  .edit-save-btn { background: var(--accent); color: #0f0f11; font-weight: 700; }
-  .edit-cancel-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
-  .edit-save-btn:hover, .edit-cancel-btn:hover { opacity: 0.8; }
-
-  /* Log Table */
-  .log-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-  }
-
+  .log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .log-title { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
   .log-count { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); }
-
   .log-list { display: flex; flex-direction: column; gap: 6px; }
+  .log-empty { text-align: center; padding: 32px 0; color: var(--muted); font-size: 0.85rem; }
 
-  .log-empty {
-    text-align: center;
-    padding: 32px 0;
-    color: var(--muted);
-    font-size: 0.85rem;
-  }
-
-  .log-row {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: border-color 0.15s;
-  }
-
+  .log-row { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; align-items: center; gap: 10px; transition: border-color 0.15s; }
   .log-row:hover { border-color: #3e3e50; }
-
   .log-row.editing { border-color: var(--accent); }
-
-  .log-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    color: var(--muted);
-    min-width: 52px;
-  }
-
-  .log-times {
-    flex: 1;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    color: var(--text);
-  }
-
-  .log-ot {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--accent);
-    min-width: 52px;
-    text-align: right;
-  }
-
+  .log-date { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--muted); min-width: 52px; }
+  .log-times { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--text); }
+  .log-ot { font-family: 'DM Mono', monospace; font-size: 0.9rem; font-weight: 500; color: var(--accent); min-width: 52px; text-align: right; }
   .log-ot.zero { color: var(--muted); }
 
-  .row-actions {
-    display: flex;
-    gap: 4px;
-  }
+  .edit-fields { display: none; gap: 6px; align-items: center; background: var(--surface); border-radius: var(--radius-sm); padding: 6px 8px; margin-top: 6px; flex-wrap: wrap; }
+  .edit-fields.active { display: flex; }
+  .edit-fields input { font-family: 'DM Mono', monospace; font-size: 0.8rem; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 5px 8px; outline: none; width: 90px; }
+  .edit-fields input:focus { border-color: var(--accent); }
+  .edit-save-btn, .edit-cancel-btn { font-family: 'DM Mono', monospace; font-size: 0.72rem; padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer; }
+  .edit-save-btn { background: var(--accent); color: #0f0f11; font-weight: 700; }
+  .edit-cancel-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
 
-  .icon-btn {
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 0.75rem;
-    padding: 4px 7px;
-    transition: all 0.15s;
-    line-height: 1;
-  }
-
+  .row-actions { display: flex; gap: 4px; }
+  .icon-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--muted); cursor: pointer; font-size: 0.75rem; padding: 4px 7px; transition: all 0.15s; line-height: 1; }
   .icon-btn:hover { color: var(--text); border-color: #3e3e50; }
   .icon-btn.del:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-dim); }
   .icon-btn.edit-active { color: var(--accent); border-color: var(--accent); background: var(--accent-dim); }
 
-  /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 18px;
-    font-size: 0.82rem;
-    color: var(--text);
-    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-    z-index: 100;
-    white-space: nowrap;
-  }
-
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 18px; font-size: 0.82rem; color: var(--text); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); z-index: 100; white-space: nowrap; }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.success { border-color: var(--accent); color: var(--accent); }
   .toast.danger { border-color: var(--danger); color: var(--danger); }
 
-  /* Modal */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.65);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 200;
-    padding: 20px;
-  }
-
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
   .modal-overlay.show { display: flex; }
-
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    width: 100%;
-    max-width: 340px;
-  }
-
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 340px; }
   .modal h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
   .modal p { font-size: 0.85rem; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
-
   .modal-actions { display: flex; gap: 8px; }
-
-  .modal-btn {
-    flex: 1;
-    padding: 11px;
-    border-radius: var(--radius-sm);
-    border: none;
-    cursor: pointer;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    transition: opacity 0.15s;
-  }
-
-  .modal-btn:hover { opacity: 0.85; }
+  .modal-btn { flex: 1; padding: 11px; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; }
   .modal-cancel { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
   .modal-confirm { background: var(--danger); color: white; }
+
+  .loading-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 300; gap: 14px; transition: opacity 0.4s; }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--muted); }
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <div class="app-title">OT <span>Tracker</span></div>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Connecting to Firebase...</div>
 </div>
 
-<!-- Month Navigation -->
+<div class="app-header">
+  <div class="app-title">OT <span>Tracker</span></div>
+  <div class="sync-badge" id="syncBadge">
+    <div class="dot"></div>
+    <span id="syncText">Connecting</span>
+  </div>
+</div>
+
 <div class="month-bar">
   <button class="month-nav" onclick="changeMonth(-1)">&#8249;</button>
   <div class="month-label" id="monthLabel">—</div>
@@ -450,7 +141,6 @@
   <button class="reset-btn" onclick="confirmReset()">Reset month</button>
 </div>
 
-<!-- Milestone -->
 <div class="card">
   <div class="milestone-top">
     <div>
@@ -462,57 +152,33 @@
       <input class="target-input" type="number" id="targetInput" value="40" onchange="saveTarget()">
     </div>
   </div>
-  <div class="progress-track">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
   <div class="milestone-stats">
-    <div class="stat">
-      <div class="stat-label">Progress</div>
-      <div class="stat-val accent" id="percentText">0%</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Remaining</div>
-      <div class="stat-val" id="remainingText">0.00h</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Entries</div>
-      <div class="stat-val" id="entryCount">0</div>
-    </div>
+    <div class="stat"><div class="stat-label">Progress</div><div class="stat-val accent" id="percentText">0%</div></div>
+    <div class="stat"><div class="stat-label">Remaining</div><div class="stat-val" id="remainingText">0.00h</div></div>
+    <div class="stat"><div class="stat-label">Entries</div><div class="stat-val" id="entryCount">0</div></div>
   </div>
 </div>
 
-<!-- Input -->
 <div class="card">
   <div class="input-grid">
-    <div class="field full">
-      <label>Date</label>
-      <input type="date" id="workDate">
-    </div>
-    <div class="field">
-      <label>Clock In</label>
-      <input type="time" id="inTime" value="08:30">
-    </div>
-    <div class="field">
-      <label>Clock Out</label>
-      <input type="time" id="outTime" value="17:00">
-    </div>
+    <div class="field full"><label>Date</label><input type="date" id="workDate"></div>
+    <div class="field"><label>Clock In</label><input type="time" id="inTime" value="08:30"></div>
+    <div class="field"><label>Clock Out</label><input type="time" id="outTime" value="17:00"></div>
   </div>
-  <button class="save-btn" onclick="saveEntry()">Save Entry</button>
+  <button class="save-btn" id="saveBtn" onclick="saveEntry()">Save Entry</button>
 </div>
 
-<!-- Log -->
 <div class="card">
   <div class="log-header">
     <div class="log-title">Log</div>
     <div class="log-count" id="logCount"></div>
   </div>
-  <div class="log-list" id="logList"></div>
+  <div class="log-list" id="logList"><div class="log-empty">Loading...</div></div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- Reset Confirm Modal -->
 <div class="modal-overlay" id="resetModal">
   <div class="modal">
     <h3>Reset this month?</h3>
@@ -524,134 +190,206 @@
   </div>
 </div>
 
-<script>
-  const STORE_KEY = 'ot_tracker_v4';
-  const TARGET_KEY = 'ot_target_v4';
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js";
+  import {
+    getFirestore, collection, doc, setDoc, getDoc, deleteDoc,
+    query, where, getDocs, onSnapshot, writeBatch
+  } from "https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js";
 
-  // Current view month
-  let viewDate = new Date();
-  viewDate.setDate(1);
+  // ── Firebase Config ──────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey: "AIzaSyCbtZUb3BR9JBypI5PrhsEQBh7RJdkWnw0",
+    authDomain: "ot-tracker-11253.firebaseapp.com",
+    projectId: "ot-tracker-11253",
+    storageBucket: "ot-tracker-11253.firebasestorage.app",
+    messagingSenderId: "10640728685",
+    appId: "1:10640728685:web:51ca8e8a3d1b18f4299564"
+  };
 
-  function getMonthKey(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  }
+  const app  = initializeApp(firebaseConfig);
+  const db   = getFirestore(app);
+  const ENTRIES    = collection(db, "ot_entries");
+  const TARGET_DOC = doc(db, "ot_settings", "target");
 
-  function getMonthLabel(d) {
-    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  }
+  // ── State ────────────────────────────────────────────────────
+  let viewDate = new Date(); viewDate.setDate(1);
+  let editingDate = null;
+  let cachedEntries = [];
+  let unsubscribe = null;
 
-  function getLogs() {
-    return JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
-  }
+  document.getElementById('workDate').value = new Date().toISOString().slice(0,10);
 
-  function saveLogs(data) {
-    localStorage.setItem(STORE_KEY, JSON.stringify(data));
-  }
-
-  function calcOT(inT, outT) {
+  // ── Helpers ──────────────────────────────────────────────────
+  const getMonthKey   = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  const getMonthLabel = d => d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+  const fmtDate = s => { const [y,m,d] = s.split('-'); return `${d}/${m}`; };
+  const calcOT  = (inT, outT) => {
     const toMins = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
     let s = toMins(inT), e = toMins(outT);
     if (e < s) e += 1440;
     return Math.max(0, (e - s - 30) / 60 - 8.0);
+  };
+
+  // ── Sync badge ───────────────────────────────────────────────
+  const setSyncState = state => {
+    const badge = document.getElementById('syncBadge');
+    const text  = document.getElementById('syncText');
+    badge.className = 'sync-badge ' + state;
+    const labels = { synced:'Synced', syncing:'Syncing', error:'Error' };
+    text.textContent = labels[state] || 'Connecting';
+  };
+
+  // ── Target ───────────────────────────────────────────────────
+  async function loadTarget() {
+    try {
+      const snap = await getDoc(TARGET_DOC);
+      if (snap.exists()) document.getElementById('targetInput').value = snap.data().value;
+    } catch(e) {}
   }
 
-  function changeMonth(delta) {
+  window.saveTarget = async () => {
+    const val = parseFloat(document.getElementById('targetInput').value) || 40;
+    try { await setDoc(TARGET_DOC, { value: val }); } catch(e) {}
+    render();
+  };
+
+  // ── Month navigation ─────────────────────────────────────────
+  window.changeMonth = delta => {
     viewDate.setMonth(viewDate.getMonth() + delta);
-    render();
+    subscribeMonth();
+  };
+
+  // ── Realtime listener ────────────────────────────────────────
+  function subscribeMonth() {
+    if (unsubscribe) unsubscribe();
+    const mk = getMonthKey(viewDate);
+    document.getElementById('monthLabel').textContent = getMonthLabel(viewDate);
+    setSyncState('syncing');
+
+    const q = query(ENTRIES, where("month", "==", mk));
+    unsubscribe = onSnapshot(q,
+      snap => {
+        cachedEntries = snap.docs.map(d => d.data());
+        setSyncState('synced');
+        render();
+        const ol = document.getElementById('loadingOverlay');
+        if (ol) { ol.classList.add('hidden'); setTimeout(() => ol.remove(), 500); }
+      },
+      err => { setSyncState('error'); showToast('Sync error', 'danger'); }
+    );
   }
 
-  // Set today's date in input
-  const today = new Date();
-  document.getElementById('workDate').value = today.toISOString().slice(0,10);
-
-  // Load target
-  const savedTarget = localStorage.getItem(TARGET_KEY);
-  if (savedTarget) document.getElementById('targetInput').value = savedTarget;
-
-  function saveTarget() {
-    localStorage.setItem(TARGET_KEY, document.getElementById('targetInput').value);
-    render();
-  }
-
-  function saveEntry() {
+  // ── Save entry ───────────────────────────────────────────────
+  window.saveEntry = async () => {
     const date = document.getElementById('workDate').value;
     const inT  = document.getElementById('inTime').value;
     const outT = document.getElementById('outTime').value;
     if (!date || !inT || !outT) { showToast('Fill all fields', 'danger'); return; }
 
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    setSyncState('syncing');
     const ot = calcOT(inT, outT);
-    const all = getLogs();
     const mk = date.slice(0,7);
-    if (!all[mk]) all[mk] = [];
-    all[mk] = all[mk].filter(l => l.date !== date);
-    all[mk].push({ date, inT, outT, ot });
-    saveLogs(all);
+    try {
+      await setDoc(doc(ENTRIES, date), { date, inT, outT, ot, month: mk });
+      viewDate = new Date(date + 'T00:00:00'); viewDate.setDate(1);
+      subscribeMonth();
+      showToast('Entry saved ✓', 'success');
+    } catch(e) { setSyncState('error'); showToast('Save failed', 'danger'); }
+    btn.disabled = false;
+  };
 
-    // Navigate to the saved month
-    viewDate = new Date(date + 'T00:00:00');
-    viewDate.setDate(1);
-
-    showToast('Entry saved', 'success');
-    render();
-  }
-
-  let editingDate = null;
-
-  function startEdit(date) {
-    editingDate = date;
-    render();
-  }
-
-  function cancelEdit() {
-    editingDate = null;
-    render();
-  }
-
-  function saveEdit(date) {
-    const inT  = document.getElementById('edit-in-' + date).value;
+  // ── Edit ─────────────────────────────────────────────────────
+  window.startEdit  = date => { editingDate = date; render(); };
+  window.cancelEdit = ()   => { editingDate = null; render(); };
+  window.saveEdit   = async date => {
+    const inT  = document.getElementById('edit-in-'  + date).value;
     const outT = document.getElementById('edit-out-' + date).value;
     if (!inT || !outT) return;
     const ot = calcOT(inT, outT);
-    const mk = date.slice(0,7);
-    const all = getLogs();
-    const idx = all[mk].findIndex(l => l.date === date);
-    if (idx > -1) { all[mk][idx] = { date, inT, outT, ot }; }
-    saveLogs(all);
-    editingDate = null;
-    showToast('Entry updated', 'success');
-    render();
-  }
+    setSyncState('syncing');
+    try {
+      await setDoc(doc(ENTRIES, date), { date, inT, outT, ot, month: date.slice(0,7) });
+      editingDate = null;
+      showToast('Entry updated ✓', 'success');
+    } catch(e) { setSyncState('error'); showToast('Update failed', 'danger'); }
+  };
 
-  function deleteEntry(date) {
-    const mk = date.slice(0,7);
-    const all = getLogs();
-    if (all[mk]) all[mk] = all[mk].filter(l => l.date !== date);
-    saveLogs(all);
-    showToast('Entry deleted', 'danger');
-    render();
-  }
+  // ── Delete ───────────────────────────────────────────────────
+  window.deleteEntry = async date => {
+    setSyncState('syncing');
+    try {
+      await deleteDoc(doc(ENTRIES, date));
+      showToast('Entry deleted', 'danger');
+    } catch(e) { setSyncState('error'); showToast('Delete failed', 'danger'); }
+  };
 
-  function confirmReset() {
+  // ── Reset month ──────────────────────────────────────────────
+  window.confirmReset = () => {
     document.getElementById('resetMonthName').textContent = getMonthLabel(viewDate);
     document.getElementById('resetModal').classList.add('show');
-  }
-
-  function closeModal() {
-    document.getElementById('resetModal').classList.remove('show');
-  }
-
-  function doReset() {
-    const mk = getMonthKey(viewDate);
-    const all = getLogs();
-    delete all[mk];
-    saveLogs(all);
+  };
+  window.closeModal = () => document.getElementById('resetModal').classList.remove('show');
+  window.doReset = async () => {
     closeModal();
-    showToast('Month reset', 'danger');
-    render();
+    setSyncState('syncing');
+    try {
+      const snap = await getDocs(query(ENTRIES, where("month","==",getMonthKey(viewDate))));
+      const batch = writeBatch(db);
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      showToast('Month reset', 'danger');
+    } catch(e) { setSyncState('error'); showToast('Reset failed', 'danger'); }
+  };
+
+  // ── Render ───────────────────────────────────────────────────
+  function render() {
+    const entries   = cachedEntries.slice().sort((a,b) => a.date.localeCompare(b.date));
+    const target    = parseFloat(document.getElementById('targetInput').value) || 1;
+    const totalOT   = entries.reduce((s,e) => s + e.ot, 0);
+    const percent   = Math.min(100, (totalOT / target) * 100);
+    const remaining = Math.max(0, target - totalOT);
+
+    document.getElementById('totalOT').innerHTML = `${totalOT.toFixed(2)} <sub>hrs</sub>`;
+    document.getElementById('progressFill').style.width = percent + '%';
+    document.getElementById('progressFill').className = 'progress-fill' + (percent >= 100 ? ' done' : '');
+    document.getElementById('percentText').textContent  = percent.toFixed(1) + '%';
+    document.getElementById('remainingText').textContent = remaining.toFixed(2) + 'h';
+    document.getElementById('entryCount').textContent   = entries.length;
+    document.getElementById('logCount').textContent     = entries.length ? entries.length + ' entries' : '';
+
+    const list = document.getElementById('logList');
+    if (!entries.length) { list.innerHTML = '<div class="log-empty">No entries for this month</div>'; return; }
+
+    list.innerHTML = entries.map(item => {
+      const isEditing = editingDate === item.date;
+      return `
+      <div class="log-row ${isEditing ? 'editing' : ''}">
+        <div class="log-date">${fmtDate(item.date)}</div>
+        <div style="flex:1">
+          <div class="log-times">${item.inT} – ${item.outT}</div>
+          <div class="edit-fields ${isEditing ? 'active' : ''}">
+            <input type="time" id="edit-in-${item.date}" value="${item.inT}">
+            <span style="color:var(--muted);font-size:0.75rem">→</span>
+            <input type="time" id="edit-out-${item.date}" value="${item.outT}">
+            <button class="edit-save-btn" onclick="saveEdit('${item.date}')">Save</button>
+            <button class="edit-cancel-btn" onclick="cancelEdit()">✕</button>
+          </div>
+        </div>
+        <div class="log-ot ${item.ot===0?'zero':''}">${item.ot.toFixed(2)}h</div>
+        <div class="row-actions">
+          <button class="icon-btn ${isEditing?'edit-active':''}" onclick="${isEditing?`cancelEdit()`:`startEdit('${item.date}')`}" title="Edit">✎</button>
+          <button class="icon-btn del" onclick="deleteEntry('${item.date}')" title="Delete">✕</button>
+        </div>
+      </div>`;
+    }).join('');
   }
 
+  // ── Toast ────────────────────────────────────────────────────
   let toastTimer;
-  function showToast(msg, type) {
+  window.showToast = (msg, type) => {
     const t = document.getElementById('toast');
     t.textContent = msg;
     t.className = 'toast ' + (type || '');
@@ -659,65 +397,11 @@
     t.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-  }
+  };
 
-  function fmtDate(dateStr) {
-    const [y,m,d] = dateStr.split('-');
-    return `${d}/${m}`;
-  }
-
-  function render() {
-    const mk = getMonthKey(viewDate);
-    document.getElementById('monthLabel').textContent = getMonthLabel(viewDate);
-
-    const all = getLogs();
-    const entries = (all[mk] || []).slice().sort((a,b) => a.date.localeCompare(b.date));
-
-    const target = parseFloat(document.getElementById('targetInput').value) || 1;
-    let totalOT = entries.reduce((s, e) => s + e.ot, 0);
-
-    const percent = Math.min(100, (totalOT / target) * 100);
-    const remaining = Math.max(0, target - totalOT);
-
-    document.getElementById('totalOT').innerHTML = `${totalOT.toFixed(2)} <sub>hrs</sub>`;
-    document.getElementById('progressFill').style.width = percent + '%';
-    document.getElementById('progressFill').className = 'progress-fill' + (percent >= 100 ? ' done' : '');
-    document.getElementById('percentText').textContent = percent.toFixed(1) + '%';
-    document.getElementById('remainingText').textContent = remaining.toFixed(2) + 'h';
-    document.getElementById('entryCount').textContent = entries.length;
-    document.getElementById('logCount').textContent = entries.length ? entries.length + ' entries' : '';
-
-    const list = document.getElementById('logList');
-    if (!entries.length) {
-      list.innerHTML = '<div class="log-empty">No entries for this month</div>';
-      return;
-    }
-
-    list.innerHTML = entries.map(item => {
-      const isEditing = editingDate === item.date;
-      return `
-        <div class="log-row ${isEditing ? 'editing' : ''}">
-          <div class="log-date">${fmtDate(item.date)}</div>
-          <div style="flex:1">
-            <div class="log-times">${item.inT} – ${item.outT}</div>
-            <div class="edit-fields ${isEditing ? 'active' : ''}">
-              <input type="time" id="edit-in-${item.date}" value="${item.inT}">
-              <span style="color:var(--muted);font-size:0.75rem">→</span>
-              <input type="time" id="edit-out-${item.date}" value="${item.outT}">
-              <button class="edit-save-btn" onclick="saveEdit('${item.date}')">Save</button>
-              <button class="edit-cancel-btn" onclick="cancelEdit()">✕</button>
-            </div>
-          </div>
-          <div class="log-ot ${item.ot === 0 ? 'zero' : ''}">${item.ot.toFixed(2)}h</div>
-          <div class="row-actions">
-            <button class="icon-btn ${isEditing ? 'edit-active' : ''}" onclick="${isEditing ? 'cancelEdit()' : `startEdit('${item.date}')`}" title="Edit">✎</button>
-            <button class="icon-btn del" onclick="deleteEntry('${item.date}')" title="Delete">✕</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  render();
+  // ── Boot ─────────────────────────────────────────────────────
+  await loadTarget();
+  subscribeMonth();
 </script>
 </body>
 </html>
